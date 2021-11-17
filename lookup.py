@@ -9,7 +9,7 @@ key = '?apikey=d4d79110-44e2-11ec-b60c-f1d7f1dfb6b1'
 path = os.path.dirname(__file__)
 input_file = "malicious_phish.csv"
 df = pd.read_csv(os.path.join(path, input_file))
-num = 97001
+num = 111501
 while num < df['URL'].count() + 1:
     total = num+14500
     if total > df['URL'].count() + 1:
