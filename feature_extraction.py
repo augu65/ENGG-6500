@@ -97,43 +97,18 @@ def num_characters(df):
     df['Num_Symbol'] = symbol
     return df
 
-def page_rank(df):
-    '''
-    Gets the page rank of the base urls
-    :param df:
-    :return: df
-    '''
-    url = "https://www.domcop.com/openpagerank/"
-    fireFoxOptions = webdriver.FirefoxOptions()
-    fireFoxOptions.set_headless()
-    browser = webdriver.Firefox(firefox_options=fireFoxOptions)
-    browser.get(url)
-    rank = []
-    for x in df['URL']:
-        elem = browser.find_element_by_id("prc_host")
-        elem.clear()
-        elem.send_keys(x)
-        elem.send_keys(Keys.RETURN)
-        time.sleep(1)
-        try:
-            elem = browser.find_element_by_xpath("//span[@role = 'progressbar']")
-            rank.append(elem.get_attribute("aria-valuenow"))
-        except Exception:
-            rank.append(0)
-    df['Page_Rank'] = rank
-    return df
 
 if __name__ == "__main__":
     path = os.path.dirname(__file__)
-    input_file = "out2.csv"
+    input_file = "data/out3.csv"
     df = pd.read_csv(os.path.join(path, input_file))
     df['Country'].fillna('zz', inplace=True)
+    df = df.drop('URL2', 1)
     df.loc[df['Label'].str.contains('benign'), 'Label'] = 0
     df.loc[~df['Label'].str.contains('benign', na=True), 'Label'] = 1
     df = protocol(df)
     df = website(df)
     df = url_path(df)
     df = num_characters(df)
-    df = page_rank(df)
     df.to_csv('extracted_features.csv',index=False)
     a = 1

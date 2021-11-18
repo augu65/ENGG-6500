@@ -9,7 +9,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import os
 import time
-df = pd.read_csv("out2.csv")
+
+df = pd.read_csv("data/out2.csv")
 df['URL2'] = df['URL']
 df["URL2"] = df["URL2"].str.replace('http://','')
 df["URL2"] = df["URL2"].str.replace('https://','')
@@ -32,7 +33,7 @@ fireFoxprofile.set_preference("browser.helperApps.neverAsk.openFile", "")
 fireFoxprofile.set_preference("browser.download.manager.alertOnEXEOpen", False)
 fireFoxprofile.set_preference("browser.download.manager.showAlertOnComplete", False)
 fireFoxprofile.set_preference("browser.download.manager.closeWhenDone", True)
-fireFoxOptions.set_headless()
+#fireFoxOptions.set_headless()
 browser = webdriver.Firefox(firefox_profile=fireFoxprofile,firefox_options=fireFoxOptions)
 browser.get(url)
 rank = []
@@ -41,7 +42,7 @@ while num < df['URL2'].count() + 1:
     if total > df['URL'].count() + 1:
         total = df['URL'].count() + 1
     df2 = df[num:total]
-    num = total + 1
+    num = total
     print(total)
     elem = browser.find_element_by_id("domains")
     elem.clear()
@@ -49,8 +50,13 @@ while num < df['URL2'].count() + 1:
     elem = browser.find_element_by_id("get_page_rank")
     elem.click()
     time.sleep(5)
-    elem = browser.find_element_by_xpath("//span[contains(text(), 'CSV')]")
-    elem.click()
+    try:
+        elem = browser.find_element_by_xpath("//span[contains(text(), 'CSV')]")
+        elem.click()
+    except Exception:
+        time.sleep(5)
+        elem = browser.find_element_by_xpath("//span[contains(text(), 'CSV')]")
+        elem.click()
     time.sleep(2)
     list_of_files = glob.glob('C:\\Users\\Jonah\\Downloads\\*')  # * means all if need specific format then *.csv
     file = max(list_of_files, key=os.path.getctime)
@@ -65,7 +71,7 @@ while num < df['URL2'].count() + 1:
             i = df2.loc[df2['URL2'].str.contains(i)].index[0]
             rank.insert(i, '0.0')
     except Exception as e:
-        print(e)
+        pass
 
     os.remove(file)
     browser.refresh()
