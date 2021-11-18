@@ -103,7 +103,7 @@ def page_rank(df):
     :param df:
     :return: df
     '''
-    url = "https://dnschecker.org/pagerank.php"
+    url = "https://www.domcop.com/openpagerank/"
     fireFoxOptions = webdriver.FirefoxOptions()
     fireFoxOptions.set_headless()
     browser = webdriver.Firefox(firefox_options=fireFoxOptions)
