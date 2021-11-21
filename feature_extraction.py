@@ -7,10 +7,7 @@ in a machine learning program
 import pandas as pd
 import os
 import re
-import time
-from selenium import webdriver
-from selenium.webdriver.common.keys import Keys
-from bs4 import BeautifulSoup
+
 def protocol(df):
     '''
     Protocol:
@@ -106,9 +103,14 @@ if __name__ == "__main__":
     df = df.drop('URL2', 1)
     df.loc[df['Label'].str.contains('benign'), 'Label'] = 0
     df.loc[~df['Label'].str.contains('benign', na=True), 'Label'] = 1
+    countries = "VN|CN"
+    df.loc[df['Country'].str.contains(countries), 'Country'] = 1
+    #df.loc[df['Country'].str.contains('US', na=True), 'Country'] = 3
+    df.loc[df['Country'].str.contains('zz', na=True), 'Country'] = 2
+    df.loc[~df['Country'].str.contains(countries, na=True), 'Country'] = 0
     df = protocol(df)
     df = website(df)
     df = url_path(df)
     df = num_characters(df)
-    df.to_csv('extracted_features.csv',index=False)
+    df.to_csv('data/extracted_features.csv',index=False)
     a = 1
