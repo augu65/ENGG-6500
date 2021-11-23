@@ -5,9 +5,11 @@ This file will use a random forest to classify the data set
 '''
 import pandas as pd
 import os
+from sklearn.metrics import PrecisionRecallDisplay
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import precision_score, recall_score, roc_auc_score, roc_curve, accuracy_score
+from sklearn.metrics import f1_score
 import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn import tree
@@ -54,7 +56,7 @@ def visualize_tree(clf, x):
     tree.plot_tree(clf.estimators_[0],
                    feature_names = fn,
                    class_names=cn,
-                   filled = True);
+                   filled = True)
     fig.savefig('rf_individualtree.png')
 
 
@@ -77,20 +79,36 @@ def evaluate_model(clf, test_values, test_labels):
     # Plot both curves
     plt.plot(base_fpr, base_tpr, 'b', label=f'baseline: 0.5')
     plt.plot(model_fpr, model_tpr, 'r', label=f'AUC: {auc:.3f}')
-    plt.legend();
-    plt.xlabel('False Positive Rate');
-    plt.ylabel('True Positive Rate');
-    plt.title('ROC Curves');
+    plt.legend()
+    plt.xlabel('False Positive Rate')
+    plt.ylabel('True Positive Rate')
+    plt.title('ROC Curves')
     plt.show()
 
+def speed_test(clf,path):
+    '''
+    This function tests the speed of the classifier
+    :param clf:
+    :param path:
+    :return:
+    '''
+    input_file = "data/extracted_features2.csv"
+    df = pd.read_csv(os.path.join(path, input_file))
+    x = df.drop(['Label', 'URL', 'Num_Digits', 'Num_Alpha'], 1)
+    for i in range(10):
+        start = datetime.now()
+        clf.predict(x[i:i+1])
+        stop = datetime.now()
+        diff = stop - start
+        print(diff.total_seconds())
 
 if __name__ == "__main__":
     path = os.path.dirname(__file__)
-    input_file = "data/extracted_features.csv"
+    input_file = "data/extracted_features2.csv"
     #read in file
     df = pd.read_csv(os.path.join(path, input_file))
     #drop unused columns
-    x = df.drop(['Label', 'URL','Country','Primary', 'Num_Digits', 'Num_Alpha'], 1)
+    x = df.drop(['Label', 'URL', 'Num_Digits', 'Num_Alpha'], 1)
     y = df['Label']
 
     #split data set into train and test
@@ -108,14 +126,27 @@ if __name__ == "__main__":
     stop = datetime.now()
     diff = stop - start
     print(diff.total_seconds())
+    #speed_test(clf, path)
     y_pred = clf.predict(x_test)
+
+    #get f1 score
+    f1 = f1_score(y_test, y_pred)
+    print(f1)
+    #looking at fp and fn's
+    # y_test = y_test.reset_index()
+    # x_test = x_test.reset_index()
+    # df2 = pd.DataFrame()
+    # data = []
+    # for j in range(0, len(y_pred)):
+    #     if y_test['Label'][j] != y_pred[j] and y_pred[j] == 0:
+    #         data.append(x_test[j:j+1])
+    # df2 = df2.append(data, ignore_index=True)
+    # print(df2)
     #get accuracy
     print("Accuracy:", accuracy_score(y_test, y_pred))
-
     #depth_of_forest(clf)
     #feature_importance(clf, x)
     #visualize_tree(clf, x)
-    #roc(clf, x_test, y_test)
     #evaluate_model(clf, x_test, y_test)
 
 

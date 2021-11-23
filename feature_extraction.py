@@ -97,20 +97,20 @@ def num_characters(df):
 
 if __name__ == "__main__":
     path = os.path.dirname(__file__)
-    input_file = "data/out3.csv"
+    input_file = "data/out4.csv"
     df = pd.read_csv(os.path.join(path, input_file))
-    df['Country'].fillna('zz', inplace=True)
+    # df['Country'].fillna('zz', inplace=True)
     df = df.drop('URL2', 1)
     df.loc[df['Label'].str.contains('benign'), 'Label'] = 0
     df.loc[~df['Label'].str.contains('benign', na=True), 'Label'] = 1
-    countries = "VN|CN"
-    df.loc[df['Country'].str.contains(countries), 'Country'] = 1
-    #df.loc[df['Country'].str.contains('US', na=True), 'Country'] = 3
-    df.loc[df['Country'].str.contains('zz', na=True), 'Country'] = 2
-    df.loc[~df['Country'].str.contains(countries, na=True), 'Country'] = 0
+    # countries = "VN|CN"
+    # df.loc[df['Country'].str.contains(countries), 'Country'] = 1
+    # #df.loc[df['Country'].str.contains('US', na=True), 'Country'] = 3
+    # df.loc[df['Country'].str.contains('zz', na=True), 'Country'] = 2
+    # df.loc[~df['Country'].str.contains(countries, na=True), 'Country'] = 0
     df = protocol(df)
     df = website(df)
     df = url_path(df)
     df = num_characters(df)
-    df.to_csv('data/extracted_features.csv',index=False)
+    df.to_csv('data/extracted_features2.csv',index=False)
     a = 1

@@ -23,9 +23,9 @@ df["URL2"] = df["URL2"].str.replace('http://','')
 df["URL2"] = df["URL2"].str.replace('https://','')
 df["URL2"] = df["URL2"].str.replace('ftp://','')
 df["URL2"] = df["URL2"].str.split("/").str[0]
-
+df = df[555100:]
+df = df.reset_index(drop=True)
 url = "https://www.domcop.com/openpagerank/"
-
 #configure seleniums firefox profiles
 fireFoxOptions = webdriver.FirefoxOptions()
 fireFoxprofile = webdriver.FirefoxProfile()
@@ -41,7 +41,7 @@ fireFoxprofile.set_preference("browser.helperApps.neverAsk.openFile", "")
 fireFoxprofile.set_preference("browser.download.manager.alertOnEXEOpen", False)
 fireFoxprofile.set_preference("browser.download.manager.showAlertOnComplete", False)
 fireFoxprofile.set_preference("browser.download.manager.closeWhenDone", True)
-fireFoxOptions.set_headless()
+#fireFoxOptions.set_headless()
 
 #open webpage for webscraping of page ranks
 browser = webdriver.Firefox(firefox_profile=fireFoxprofile,firefox_options=fireFoxOptions)
@@ -56,6 +56,7 @@ while num < df['URL2'].count() + 1:
     df2 = df[num:total]
     num = total
     print(total)
+    print(f"rank : {len(rank)}")
     #insert list of URLs for analysis of page rank
     elem = browser.find_element_by_id("domains")
     elem.clear()
@@ -68,7 +69,7 @@ while num < df['URL2'].count() + 1:
         elem = browser.find_element_by_xpath("//span[contains(text(), 'CSV')]")
         elem.click()
     except Exception:
-        time.sleep(5)
+        time.sleep(8)
         elem = browser.find_element_by_xpath("//span[contains(text(), 'CSV')]")
         elem.click()
     time.sleep(2)
@@ -77,7 +78,10 @@ while num < df['URL2'].count() + 1:
     file = max(list_of_files, key=os.path.getctime)
     df3 = pd.read_csv(file)
     #set unknown page ranks to 0
-    df3.loc[df3['Page Rank Value'].str.contains('-', na=True), 'Page Rank Value'] = '0.0'
+    try:
+        df3.loc[df3['Page Rank Value'].str.contains('-', na=True), 'Page Rank Value'] = '0.0'
+    except AttributeError:
+        pass
     rank += df3['Page Rank Value'].tolist()
     try:
         # gets unknown URLs and sets page ranks to 0
@@ -85,14 +89,21 @@ while num < df['URL2'].count() + 1:
         elem = elem.get_attribute("data-domains")
         elem = elem.replace("[",'').replace("]",'').replace('"','').split(",")
         for i in elem:
-            i = df2.loc[df2['URL2'].str.contains(i)].index[0]
-            rank.insert(i, '0.0')
+            try:
+                i = i.split('?')[0]
+                y = df2.loc[df['URL2'].str.contains(i)].index[0]
+            except Exception:
+                y = df2[(df2 == i).any(axis=1)].index[0]
+            rank.insert(y, '0.0')
     except Exception as e:
         pass
+    if(len(rank)!=total ):
+
+        print("????")
     #clean up downloaded files
     os.remove(file)
     browser.refresh()
     time.sleep(2)
 
 df['rank'] = rank
-df.to_csv("out4.csv",index=False)
+df.to_csv("out4.csv", mode='a', index=False, header=False)
